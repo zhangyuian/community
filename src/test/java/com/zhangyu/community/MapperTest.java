@@ -4,6 +4,7 @@ import com.zhangyu.community.dao.DiscussPostMapper;
 import com.zhangyu.community.dao.UserMapper;
 import com.zhangyu.community.entity.DiscussPost;
 import com.zhangyu.community.entity.User;
+import com.zhangyu.community.utils.CommunityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +29,9 @@ public class MapperTest {
 
     @Autowired
     private DiscussPostMapper discussPostMapper;
+
+    @Autowired
+    private CommunityUtils communityUtils;
 
     @Test
     public void testSelectUser() {
@@ -99,9 +103,11 @@ public class MapperTest {
     public void insertTestUser(){
         for(int i = 0; i < 10; i++) {
             User user = new User();
-            user.setUsername("张"+ i +"三");
-            user.setEmail("张"+ i*10 +"三" + "@163.com");
-            user.setPassword("123456");
+            user.setUsername("黄"+ i +"三");
+            user.setEmail("张"+ i*12 +"三" + "@163.com");
+            user.setPassword(communityUtils.MD5("123456"+"abc"));
+            user.setSalt("abc");
+            user.setStatus(1);
             int i1 = userMapper.insertUser(user);
             System.out.println(i1);
         }

@@ -7,8 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -148,6 +150,43 @@ public class AlphaController {
 
         return list;
     }
+
+    @RequestMapping(path = "/cookies/getcookie", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendCookie(HttpServletResponse response) {
+        Cookie cookie1 = new Cookie("cookie1", UUID.randomUUID().toString());
+        //设置生效范围
+        cookie1.setPath("/community/alpha");
+        //设置生效时间
+        cookie1.setMaxAge(60 * 10);
+        //在http头中加上cookie
+        response.addCookie(cookie1);
+        return "Send cookie to you!";
+    }
+
+    @RequestMapping(path = "/cookies/sendcookie", method = RequestMethod.GET)
+    @ResponseBody
+    public String getCookie(@CookieValue("cookie1") String cookies_value){
+        System.out.println(cookies_value);
+        return "I have gotten the cookies~";
+    }
+
+    @RequestMapping(path = "/session/getSessionId", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSession(HttpSession session) {
+        session.setAttribute("键盘牌子", "罗技");
+        return "store your session!";
+    }
+
+    @RequestMapping(path = "/session/getSessionId2", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSession2(HttpSession session) {
+        System.out.println(session.getAttribute("键盘牌子"));
+        System.out.println(session.getId());
+        return "你的键盘牌子是：" + session.getAttribute("键盘牌子");
+    }
+
+
 
 
 }
