@@ -1,5 +1,6 @@
 package com.zhangyu.community.service;
 
+import com.zhangyu.community.controller.LoginController;
 import com.zhangyu.community.dao.LoginTicketMapper;
 import com.zhangyu.community.dao.UserMapper;
 import com.zhangyu.community.entity.LoginTicket;
@@ -8,20 +9,15 @@ import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.MailClient;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-
-import static com.zhangyu.community.utils.CommunityConstant.REMEMBER_ME;
 
 /**
  * @author: zhang
@@ -52,6 +48,8 @@ public class UserService {
 
     @Autowired
     LoginTicketMapper loginTicketMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public User findUserById(int id) {
         return userMapper.selectById(id);
@@ -114,11 +112,11 @@ public class UserService {
         if(user == null) {
             return CommunityConstant.ACTIVATION_FAIL;
         }
-        if(user.getActivationCode().equals(code) && user.getStatus() == 1) {
+        if(user.getActivationCode().equals(code) && user.getStatus() == 0) {
             return CommunityConstant.ACTIVATION_REPEAT;
         }
-        if(user.getActivationCode().equals(code) && user.getStatus() == 0) {
-            userMapper.updateStatus(id, 1);
+        if(user.getActivationCode().equals(code) && user.getStatus() == 1) {
+            userMapper.updateStatus(id, 0);
             return CommunityConstant.ACTIVATION_SUCCESS;
         }
         return CommunityConstant.ACTIVATION_FAIL;
@@ -167,10 +165,90 @@ public class UserService {
     public Map<String, Object> logout(String ticket){
         HashMap<String, Object> msg = new HashMap<>();
         LoginTicket loginTicket = loginTicketMapper.selectByTicket(ticket);
-        if(loginTicket != null) {
+        if(loginTicket != null && loginTicket.getStatus() == CommunityConstant.LOGIN_STATUS) {
             loginTicketMapper.updateStatus(ticket, CommunityConstant.LOGOUT_STATUS);
             msg.put("msg", "退出成功！");
+        } else {
+            msg.put("msg", "登录凭证已失效！");
         }
         return msg;
+    }
+
+    public Map<String, Object> forget(String email, String code) {
+        HashMap<String, Object> map = new HashMap<>();
+        User user = userMapper.selectByEmail(email);
+        if(user == null) {
+            map.put("emailMsg", "用户邮箱不存在！");
+            return map;
+        }
+        int statusCode = sendForGetCode(email, code);
+        if(statusCode == 0){
+            map.put("success", "已发送验证码到指定邮箱中！");
+        } else {
+            map.put("emailMsg", "验证码发送失败！");
+        }
+        return map;
+    }
+
+    public int sendForGetCode(String email, String code) {
+        Context context = new Context();
+        context.setVariable("email", email);
+        context.setVariable("code", code);
+        String process = templateEngine.process("/mail/forget", context);
+        try {
+            mailClient.sendMail(email, "重置密码", process);
+        } catch (Exception e) {
+            logger.error("邮件发送失败：" + e.getMessage());
+            return 1;
+        }
+        return 0;
+    }
+
+    public Map<String, Object> updatePassword(String email, String password) {
+        HashMap<String, Object> map = new HashMap<>();
+        try {
+            User user = userMapper.selectByEmail(email);
+            int i = userMapper.updatePassword(user.getId(), password);
+        } catch (Exception e) {
+            logger.error("重置密码失败：" + e.getMessage());
+            map.put("msg", "重置密码失败！");
+        } finally {
+            return map;
+        }
+    }
+
+    public LoginTicket findLoginTicket(String ticket) {
+        LoginTicket loginTicket = loginTicketMapper.selectByTicket(ticket);
+        if(loginTicket == null || loginTicket.getStatus() == CommunityConstant.LOGOUT_STATUS || loginTicket.getExpired().before(new Date())) {
+            return null;
+        }
+        return loginTicket;
+    }
+
+    public int updateHeaderUrl(int id, String headerUrl) {
+        int res = userMapper.updateHeader(id, headerUrl);
+        return res;
+    }
+
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
+        HashMap<String, Object> map = new HashMap<>();
+        User user = userMapper.selectById(userId);
+        if(user == null) {
+            map.put("error", "用户不存在！");
+            return map;
+        }
+        String oldPasswordSalt = communityUtils.MD5(oldPassword + user.getSalt());
+        if(user.getPassword().equals(oldPasswordSalt)) {
+            String newPasswordSalt = communityUtils.MD5(newPassword + user.getSalt());
+            userMapper.updatePassword(user.getId(), newPasswordSalt);
+            return map;
+        } else {
+            map.put("oldPasswordMsg", "密码输入错误！");
+        }
+        return map;
+    }
+
+    public User findUserByName(String username) {
+        return userMapper.selectByName(username);
     }
 }

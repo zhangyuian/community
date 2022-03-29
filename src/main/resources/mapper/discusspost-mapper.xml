@@ -32,8 +32,17 @@
         </if>
     </select>
 
-    <insert id="insertTestDiscussPost" parameterType="DiscussPost" keyProperty="id">
+    <insert id="insertDiscussPost" parameterType="DiscussPost" keyProperty="id">
         insert into discuss_post (<include refid="insertFields"></include>)
         values(#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
     </insert>
+
+    <select id="selectDiscussPost" parameterType="int" resultType="DiscussPost">
+        select <include refid="selectFields"></include> from discuss_post where id=#{postId}
+    </select>
+
+    <update id="updateCommentCount" parameterType="int">
+        update `discuss_post` set comment_count = #{count} where `id` = #{postId}
+    </update>
+
 </mapper>

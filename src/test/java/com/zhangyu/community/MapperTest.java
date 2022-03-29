@@ -1,8 +1,10 @@
 package com.zhangyu.community;
 
 import com.zhangyu.community.dao.DiscussPostMapper;
+import com.zhangyu.community.dao.MessageMapper;
 import com.zhangyu.community.dao.UserMapper;
 import com.zhangyu.community.entity.DiscussPost;
+import com.zhangyu.community.entity.Message;
 import com.zhangyu.community.entity.User;
 import com.zhangyu.community.utils.CommunityUtils;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -73,24 +76,24 @@ public class MapperTest {
     }
 
     @Test
-    public void maopao(){
-        int[] nums = {1,2,3,4,5,6,7,8,9};
-        for(int i = 0; i < nums.length - 1; i++) {
-            for(int j = 0; j < nums.length - 1 - i; j++) {
-                if(nums[j] < nums[j + 1]) {
+    public void maopao() {
+        int[] nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        for (int i = 0; i < nums.length - 1; i++) {
+            for (int j = 0; j < nums.length - 1 - i; j++) {
+                if (nums[j] < nums[j + 1]) {
                     int temp = nums[j];
-                    nums[j] = nums[j+1];
-                    nums[j+1] = temp;
+                    nums[j] = nums[j + 1];
+                    nums[j + 1] = temp;
                 }
             }
         }
         for (int num : nums) {
-            System.out.print(num+" ");
+            System.out.print(num + " ");
         }
     }
 
     @Test
-    public void testSql(){
+    public void testSql() {
         List<DiscussPost> discussPosts = discussPostMapper.selectDiscussPosts(0, 0, 10);
         for (DiscussPost discussPost : discussPosts) {
             System.out.println(discussPost);
@@ -100,12 +103,12 @@ public class MapperTest {
     }
 
     @Test
-    public void insertTestUser(){
-        for(int i = 0; i < 10; i++) {
+    public void insertTestUser() {
+        for (int i = 0; i < 10; i++) {
             User user = new User();
-            user.setUsername("黄"+ i +"三");
-            user.setEmail("张"+ i*12 +"三" + "@163.com");
-            user.setPassword(communityUtils.MD5("123456"+"abc"));
+            user.setUsername("黄" + i + "三");
+            user.setEmail("张" + i * 12 + "三" + "@163.com");
+            user.setPassword(communityUtils.MD5("123456" + "abc"));
             user.setSalt("abc");
             user.setStatus(1);
             int i1 = userMapper.insertUser(user);
@@ -115,18 +118,65 @@ public class MapperTest {
 
     @Test
     public void insertTestPost() {
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             DiscussPost discussPost = new DiscussPost();
             discussPost.setUserId(4);
             discussPost.setTitle(i + "今天晚上有雨");
             discussPost.setCreateTime(new Date());
-            discussPost.setContent(i*100 + "具体是今天晚上有雨");
+            discussPost.setContent(i * 100 + "具体是今天晚上有雨");
             discussPost.setStatus(0);
             discussPost.setType(0);
-            int i1 = discussPostMapper.insertTestDiscussPost(discussPost);
-            System.out.print(i1+" ");
+            int i1 = discussPostMapper.insertDiscussPost(discussPost);
+            System.out.print(i1 + " ");
         }
 
+    }
+
+    @Autowired
+    MessageMapper messageMapper;
+
+    @Test
+    public void messageTest() {
+        List<Message> messages1 = messageMapper.selectConversations(13, 0, 5);
+        System.out.println("会话列表：");
+        for (Message message : messages1) {
+            System.out.println(message);
+        }
+        int i1 = messageMapper.selectConversationCount(13);
+        System.out.println("会话列表的数量：" + i1);
+
+        int i2 = messageMapper.selectUnreadCount(13, null);
+        System.out.println("总的未读消息数：" + i2);
+
+        int i3 = messageMapper.selectUnreadCount(13, "13_14");
+        System.out.println("13_14这个会话的未读消息数：" + i3);
+
+        int i = messageMapper.selectUnreadCount(13, "13_14");
+        System.out.println("13_14这个conversaiont的消息数：" + i);
+
+        System.out.println("13_14这个conversation的消息列表：");
+        List<Message> messages = messageMapper.selectLetters("13_14", 0, 5);
+        for (Message message : messages) {
+            System.out.println(message);
+        }
+    }
+
+    @Test
+    public void testInsertMessage() {
+        Message message = new Message();
+        message.setContent("测试数据");
+        message.setFromId(21);
+        message.setToId(11);
+        message.setConversationId("11_21");
+        message.setStatus(0);
+        message.setCreateTime(new Date());
+
+//        int i = messageMapper.insertMessage(message);
+//        System.out.println(i);
+        List<Integer> list = new ArrayList<>();
+        list.add(16);
+        list.add(17);
+        messageMapper.updateStatus(list, 1);
     }
 
 }

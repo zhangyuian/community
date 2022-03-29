@@ -1,4 +1,6 @@
 server:
+  tomcat:
+    max-connections: 8000
   servlet:
     context-path: /community
 
@@ -38,16 +40,18 @@ mybatis:
     use-generated-keys: true
 
 #logging:
-#  file:
-#    name: logs/lab.log
-#  level:
-#    com:
-#      zhangyu:
-#        community: debug
+  file:
+    name: logs/lab.log
+  level:
+    com:
+      zhangyu:
+        community: debug
 
 # community
 community:
   path:
     domain: http://localhost:8080
+    upload: C:/Users/bytedance/Documents/header
+
 
 

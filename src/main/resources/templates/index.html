@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 	<!--访问该页面时,在此处生成CSRF令牌.-->
-<!--	<meta name="_csrf" th:content="${_csrf.token}">-->
-<!--	<meta name="_csrf_header" th:content="${_csrf.headerName}">-->
+	<meta name="_csrf">
+	<meta name="_csrf_header">
 
 	<link rel="icon" href="https://static.nowcoder.com/images/logo_87_87.png"/>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
@@ -32,7 +32,7 @@
 								<a class="nav-link" th:href="@{/index}">首页</a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical" th:if="${loginUser!=null}">
-								<a class="nav-link position-relative" th:href="@{/letter/list}">消息<span class="badge badge-danger" th:text="${allUnreadCount!=0?allUnreadCount:''}">12</span></a>
+								<a class="nav-link position-relative" th:href="@{/letter/list}">消息<span class="badge badge-danger" th:text="${letterUnreadCount}" th:if="${letterUnreadCount!=0}">12</span></a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical" th:if="${loginUser==null}">
 								<a class="nav-link" th:href="@{/register}">注册</a>
@@ -42,11 +42,12 @@
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical dropdown" th:if="${loginUser!=null}">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									<img th:src="${loginUser.headerUrl}" class="rounded-circle" style="width:30px;"/>
+									<img th:src=@{${loginUser.HeaderUrl}} class="rounded-circle" style="width:30px;"/>
 								</a>
+
 								<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-									<a class="dropdown-item text-center" th:href="@{|/user/profile/${loginUser.id}|}">个人主页</a>
-									<a class="dropdown-item text-center" th:href="@{/user/setting}">账号设置</a>
+									<a class="dropdown-item text-center" >个人主页</a>
+									<a class="dropdown-item text-center"th:href="@{/user/setting}">账号设置</a>
 									<a class="dropdown-item text-center" th:href="@{/logout}">退出登录</a>
 									<div class="dropdown-divider"></div>
 									<span class="dropdown-item text-center text-secondary" th:utext="${loginUser.username}">nowcoder</span>
@@ -54,8 +55,8 @@
 							</li>
 						</ul>
 						 搜索
-						<form class="form-inline my-2 my-lg-0" method="get" th:action="@{/search}">
-							<input class="form-control mr-sm-2" type="search" aria-label="Search" name="keyword" th:value="${keyword}"/>
+						<form class="form-inline my-2 my-lg-0" method="get">
+							<input class="form-control mr-sm-2" type="search" aria-label="Search" name="keyword"/>
 							<button class="btn btn-outline-light my-2 my-sm-0" type="submit">搜索</button>
 						</form>
 					</div>
@@ -136,16 +137,16 @@
 							<div class="text-muted font-size-12">
 								<u class="mr-3" th:utext="${map.user.username}">寒江雪</u> 发布于 <b th:text="${#dates.format(map.post.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
 								<ul class="d-inline float-right">
-<!--									<li class="d-inline ml-2">赞 <span th:text="${map.likeCount}">11</span></li>-->
-<!--									<li class="d-inline ml-2">|</li>-->
-<!--									<li class="d-inline ml-2">回帖 <span th:text="${map.post.commentCount}">7</span></li>-->
+									<li class="d-inline ml-2">赞 <span">11</span></li>
+									<li class="d-inline ml-2">|</li>
+									<li class="d-inline ml-2">回帖 <span">7</span></li>
 								</ul>
 							</div>
 						</div>						
 					</li>
 				</ul>
 				 分页
-				<nav class="mt-5" th:if="${page.rows>0}">
+				<nav class="mt-5" th:if="${page.rows>0}" th:fragment="pagination">
 					<ul class="pagination justify-content-center">
 						<li class="page-item">
 							<a class="page-link" th:href="@{${page.path}(current=1)}">首页</a>

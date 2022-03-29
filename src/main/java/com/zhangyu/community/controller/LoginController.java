@@ -3,6 +3,8 @@ package com.zhangyu.community.controller;
 import com.google.code.kaptcha.Producer;
 import com.zhangyu.community.service.UserService;
 import com.zhangyu.community.utils.CommunityConstant;
+import com.zhangyu.community.utils.CommunityUtils;
+import com.zhangyu.community.utils.MailClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,9 @@ public class LoginController {
     private String contextPath;
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    @Autowired
+    CommunityUtils communityUtils;
 
 
     @RequestMapping(path = "/login", method = RequestMethod.GET)
@@ -85,10 +90,55 @@ public class LoginController {
     @RequestMapping(path = "/logout", method = RequestMethod.GET)
     public String logout(@CookieValue("ticket") String ticket) {
         Map<String, Object> msg = userService.logout(ticket);
-        if (!msg.isEmpty()){
-            return "/site/login";
+        return "/site/login";
+    }
+
+    @RequestMapping(path = "/forget/code")
+    public String sendForgetCode(Model model, String email, HttpSession session) {
+        //生成验证码
+        String code = communityUtils.generateUUID().substring(0, 7);
+        session.setAttribute("forgetCode", code);
+        session.setAttribute("email", email);
+        //发送邮件
+        Map<String, Object> map = userService.forget(email, code);
+        //检查邮箱是否存在
+        if(map.containsKey("emailMsg")){
+            model.addAttribute("emailMsg", map.get("emailMsg"));
+        } else {
+            model.addAttribute("success", map.get("success"));
         }
-        return "redirect:/index";
+        return "/site/forget";
+    }
+
+    @RequestMapping(path = "/forget", method = RequestMethod.GET)
+    public String forget() {
+        return "/site/forget";
+    }
+
+    @RequestMapping(value = "/forget", method = RequestMethod.POST)
+    public String forget(String email, String code, String password, HttpSession session, Model model){
+        //验证邮箱、密码、账号为空
+        if(StringUtils.isBlank(email)) {
+            model.addAttribute("emailMsg", "邮箱不能为空！");
+            return "/site/forget";
+        }
+        if(StringUtils.isBlank(code)){
+            model.addAttribute("codeMsg", "验证码不能为空！");
+            return "/site/forget";
+        }
+        if(StringUtils.isBlank(password)){
+            model.addAttribute("password", "密码不能为空！");
+            return "/site/forget";
+        }
+        //验证code与邮箱是否正确
+        if(session.getAttribute("email").equals(email) && session.getAttribute("code").equals(code)) {
+            //更新密码
+            userService.updatePassword(email, password);
+            return "/site/login";
+        } else {
+            model.addAttribute("codeMsg", "验证码错误！");
+            return "/site/forget";
+        }
     }
 
 
