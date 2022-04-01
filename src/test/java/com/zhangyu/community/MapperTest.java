@@ -6,6 +6,7 @@ import com.zhangyu.community.dao.UserMapper;
 import com.zhangyu.community.entity.DiscussPost;
 import com.zhangyu.community.entity.Message;
 import com.zhangyu.community.entity.User;
+import com.zhangyu.community.service.MessageService;
 import com.zhangyu.community.utils.CommunityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,6 +178,15 @@ public class MapperTest {
         list.add(16);
         list.add(17);
         messageMapper.updateStatus(list, 1);
+    }
+
+
+    @Autowired
+    private MessageService messageService;
+
+    @Test
+    public void testDeleteMessage() {
+        messageService.setDeleteStatus(3);
     }
 
 }

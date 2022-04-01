@@ -35,7 +35,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         String ticket = CookieUtils.getValue(request, "ticket");
         LoginTicket loginTicket = userService.findLoginTicket(ticket);
         if (loginTicket != null) {
-            User user = userService.findUserById(loginTicket.getId());
+            User user = userService.findUserById(loginTicket.getUserId());
             hostHolder.setUser(user);
         }
         return true;

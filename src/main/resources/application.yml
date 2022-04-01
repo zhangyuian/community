@@ -18,11 +18,16 @@ spring:
         smtp:
           ssl:
             enable: true
+  redis:
+    database: 11
+    host: localhost
+    port: 6379
 
   datasource:
     url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
     username: root
     password: hsp
+
   #模板引擎配置
   thymeleaf:
     encoding: UTF-8

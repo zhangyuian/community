@@ -2,6 +2,7 @@ package com.zhangyu.community.controller;
 
 import com.zhangyu.community.annotation.LoginRequired;
 import com.zhangyu.community.entity.User;
+import com.zhangyu.community.service.LikeService;
 import com.zhangyu.community.service.UserService;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.HostHolder;
@@ -47,6 +48,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LikeService likeService;
 
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -133,5 +137,21 @@ public class UserController {
             model.addAttribute("oldPasswordMsg", map.get("oldPasswordMsg"));
             return "/site/setting";
         }
+    }
+
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在！");
+        }
+
+        // 用户
+        model.addAttribute("user", user);
+        // 点赞数量
+        int userLikeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", userLikeCount);
+
+        return "/site/profile";
     }
 }
