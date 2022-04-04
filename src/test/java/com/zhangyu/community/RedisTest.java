@@ -1,5 +1,6 @@
 package com.zhangyu.community;
 
+import com.zhangyu.community.utils.RedisKeyUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,9 +126,9 @@ public class RedisTest {
 
                 operations.multi();
 
-                operations.opsForSet().add(redisKey, "zhangsan");
-                operations.opsForSet().add(redisKey, "lisi");
-                operations.opsForSet().add(redisKey, "wangwu");
+                operations.opsForSet().add(redisKey, "zhangsan1");
+                operations.opsForSet().add(redisKey, "lisi2");
+                operations.opsForSet().add(redisKey, "wangwu3");
 
                 System.out.println(operations.opsForSet().members(redisKey));
 
@@ -136,4 +137,46 @@ public class RedisTest {
         });
         System.out.println(obj);
     }
+
+    @Test
+    public void testTransactionalZset() {
+        int userId = 13;
+        int entityType = 3;
+        int entityId = 16;
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
+        String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
+        Boolean add = redisTemplate.opsForZSet().add(followerKey, 13, 10);
+        System.out.println(add);
+
+
+        Object obj = redisTemplate.execute(new SessionCallback() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+
+
+                operations.multi();
+                //operations.opsForZSet().add(followeeKey, 29, 20);
+                operations.opsForZSet().add(followerKey, 19, 10);
+
+                return operations.exec();
+            }
+        });
+
+        System.out.println(obj);
+    }
+
+    @Test
+    public void testTransactionalZset2() {
+        int userId = 13;
+        int entityType = 3;
+        int entityId = 16;
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
+        String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
+
+        //redisTemplate.opsForZSet().add(followeeKey, 26, 10);
+        System.out.println(redisTemplate.opsForZSet().add(followerKey, 16, System.currentTimeMillis()));
+
+    }
+
+
 }

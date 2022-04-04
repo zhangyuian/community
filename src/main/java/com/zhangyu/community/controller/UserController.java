@@ -2,8 +2,10 @@ package com.zhangyu.community.controller;
 
 import com.zhangyu.community.annotation.LoginRequired;
 import com.zhangyu.community.entity.User;
+import com.zhangyu.community.service.FollowService;
 import com.zhangyu.community.service.LikeService;
 import com.zhangyu.community.service.UserService;
+import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.HostHolder;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     @Value("${community.path.upload}")
     private String uploadPath;
@@ -51,6 +53,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -121,15 +126,15 @@ public class UserController {
 
     @LoginRequired
     @RequestMapping(path = "/password", method = RequestMethod.POST)
-    public String setPassword( Model model, String oldPassword, String newPassword, String confirmPassword){
+    public String setPassword(Model model, String oldPassword, String newPassword, String confirmPassword) {
         User user = hostHolder.getUser();
         model.addAttribute("user", user);
-        if(!newPassword.equals(confirmPassword)) {
+        if (!newPassword.equals(confirmPassword)) {
             model.addAttribute("newPasswordMsg", "两次输入的密码不一致！");
             return "/site/setting";
         }
         Map<String, Object> map = userService.updatePassword(user.getId(), oldPassword, newPassword);
-        if(map.isEmpty()) {
+        if (map.isEmpty()) {
             model.addAttribute("msg", "密码修改成功，即将进入登录页面！");
             model.addAttribute("target", "/login");
             return "/site/operate-result";
@@ -151,6 +156,21 @@ public class UserController {
         // 点赞数量
         int userLikeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", userLikeCount);
+
+        // 关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_PERSON);
+        model.addAttribute("followeeCount", followeeCount);
+
+        // 粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_PERSON, userId);
+        model.addAttribute("followerCount", followerCount);
+
+        // 是否关注该用户
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_PERSON, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }
