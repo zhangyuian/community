@@ -41,7 +41,9 @@ public class HomeController implements CommunityConstant {
         // 方法调用前，SpringMVC会自动实例化Model 和 Page,并将Page注入Model
         // 因此，在Thymeleaf中可以直接访问Page对象中的数据
         page.setRows(discussPostService.findDiscussPostRows(0));
+        System.out.println(discussPostService.findDiscussPostRows(0));
         page.setPath("/index");
+        page.setLimit(10);
 
         List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), page.getLimit());
         List<Map<String, Object>> discussPosts = new ArrayList<>();

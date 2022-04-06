@@ -1,15 +1,19 @@
 package com.zhangyu.community.controller;
 
 import com.google.code.kaptcha.Producer;
+import com.zhangyu.community.dao.UserMapper;
+import com.zhangyu.community.entity.User;
 import com.zhangyu.community.service.UserService;
 import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.MailClient;
+import com.zhangyu.community.utils.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -24,16 +28,17 @@ import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Controller
 public class LoginController {
 
     @Autowired
-    Producer kaptchaProducer;
+    private Producer kaptchaProducer;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Value("${server.servlet.context-path}") //通过配置文件注入
     private String contextPath;
@@ -41,7 +46,7 @@ public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
-    CommunityUtils communityUtils;
+    private RedisTemplate redisTemplate;
 
 
     @RequestMapping(path = "/login", method = RequestMethod.GET)
@@ -53,8 +58,20 @@ public class LoginController {
     @RequestMapping(path = "/kaptcha", method = RequestMethod.GET)
     public void kaptcha(HttpServletResponse response, HttpSession session) {
         String text = kaptchaProducer.createText();
-        session.setAttribute("kaptcha", text);
         BufferedImage image = kaptchaProducer.createImage(text);
+//        session.setAttribute("kaptcha", text);
+
+        // 设置验证码归属(Redis重构)
+        String kaptchaOwner = CommunityUtils.generateUUID();
+        Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
+
+        // 将验证码存入redis
+        String kaptchaKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+        redisTemplate.opsForValue().set(kaptchaKey, text, 60, TimeUnit.SECONDS); // 设置60s失效
+
         response.setContentType("image/png");
         try {
             ServletOutputStream outputStream = response.getOutputStream();
@@ -66,8 +83,16 @@ public class LoginController {
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     public String login(Model model, String username, String password, String code, HttpSession session,
-                        boolean rememberme, HttpServletResponse response){
-        String kaptcha = (String) session.getAttribute("kaptcha");
+                        boolean rememberme, HttpServletResponse response,
+                        @CookieValue("kaptchaOwner") String kaptchaOwner){
+        // 检查验证码
+        // String kaptcha = (String) session.getAttribute("kaptcha");
+        // 使用redis重构
+        String kaptcha = null;
+        if (StringUtils.isNotBlank(kaptchaOwner)) {
+            String kaptchaKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+            kaptcha = (String) redisTemplate.opsForValue().get(kaptchaKey);
+        }
         if(StringUtils.isBlank(code) || StringUtils.isBlank(kaptcha) || !kaptcha.equalsIgnoreCase(code)) {
             model.addAttribute("codeMsg", "验证码不正确！");
             return "/site/login";//这里返回的是网页
@@ -96,7 +121,7 @@ public class LoginController {
     @RequestMapping(path = "/forget/code")
     public String sendForgetCode(Model model, String email, HttpSession session) {
         //生成验证码
-        String code = communityUtils.generateUUID().substring(0, 7);
+        String code = CommunityUtils.generateUUID().substring(0, 7);
         session.setAttribute("forgetCode", code);
         session.setAttribute("email", email);
         //发送邮件
@@ -140,6 +165,7 @@ public class LoginController {
             return "/site/forget";
         }
     }
+
 
 
 }

@@ -21,7 +21,7 @@ public class CommunityUtils {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public String MD5(String key) {
+    public static String MD5(String key) {
         if(StringUtils.isBlank(key)){
             return null;
         } else {
