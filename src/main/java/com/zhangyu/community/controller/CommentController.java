@@ -1,7 +1,12 @@
 package com.zhangyu.community.controller;
 
 import com.zhangyu.community.entity.Comment;
+import com.zhangyu.community.entity.DiscussPost;
+import com.zhangyu.community.entity.Event;
+import com.zhangyu.community.event.EventProducer;
 import com.zhangyu.community.service.CommentService;
+import com.zhangyu.community.service.DiscussPostService;
+import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,13 +24,19 @@ import java.util.Date;
  */
 @Controller
 @RequestMapping(path = "/comment")
-public class CommentController {
+public class CommentController implements CommunityConstant {
 
     @Autowired
     private CommentService commentService;
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private EventProducer eventProducer;
+
+    @Autowired
+    private DiscussPostService discussPostService;
 
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
@@ -34,6 +45,23 @@ public class CommentController {
         comment.setUserId(hostHolder.getUser().getId());
         comment.setStatus(0);
         commentService.addComment(comment);
+
+        // 触发评论事件
+        Event event = new Event()
+                .setTopic(TOPIC_COMMENT)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(comment.getEntityType())
+                .setEntityId(comment.getEntityId())
+                .setData("postId", discussPostId);
+
+        if (comment.getEntityType() == ENTITY_TYPE_POST) {
+            DiscussPost target = discussPostService.findDiscussPost(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        } else if (comment.getEntityType() == ENTITY_TYPE_COMMENT) {
+            Comment target = commentService.findCommentById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        }
+        eventProducer.fireEvent(event);
 
         return "redirect:/discuss/detail/" + discussPostId;
 

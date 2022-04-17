@@ -1,7 +1,10 @@
 package com.zhangyu.community.controller;
 
+import com.zhangyu.community.entity.Event;
 import com.zhangyu.community.entity.User;
+import com.zhangyu.community.event.EventProducer;
 import com.zhangyu.community.service.LikeService;
+import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,7 @@ import java.util.HashMap;
  * @description:
  */
 @Controller
-public class LikeController {
+public class LikeController implements CommunityConstant {
 
     @Autowired
     private HostHolder hostHolder;
@@ -26,9 +29,12 @@ public class LikeController {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/like", method = RequestMethod.POST)
     @ResponseBody
-    public String like(int entityType, int entityId, int entityUserId) {
+    public String like(int entityType, int entityId, int entityUserId, int postId) {
         User user = hostHolder.getUser();
         likeService.like(user.getId(), entityType, entityId, entityUserId);
 
@@ -41,6 +47,19 @@ public class LikeController {
         HashMap<String, Object> map = new HashMap<>();
         map.put("likeCount", entityLikeCount);
         map.put("likeStatus", entityLikeStatus);
+
+        // 触发点赞事件
+        if (entityLikeStatus == 1) {
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId", postId);
+
+            eventProducer.fireEvent(event);
+        }
 
         return CommunityUtils.getJSONString(0, null, map);
     }

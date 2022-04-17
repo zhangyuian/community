@@ -3,6 +3,7 @@ package com.zhangyu.community.config;
 import com.zhangyu.community.controller.interceptor.AlphaInterceptor;
 import com.zhangyu.community.controller.interceptor.LoginInterceptor;
 import com.zhangyu.community.controller.interceptor.LoginRequiredInterceptor;
+import com.zhangyu.community.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
@@ -26,6 +27,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LoginRequiredInterceptor loginRequiredInterceptor;
 
+    @Autowired
+    private MessageInterceptor messageInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(alphaInterceptor)
@@ -33,9 +37,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 //            .addPathPatterns("/register", "/login");
 
         registry.addInterceptor(loginInterceptor)
-                .excludePathPatterns("/**/*.css", "/**/*.html", "/**/*.js", "/**/*.png");
+                .excludePathPatterns("/**/*.css", "/**/*.html", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
         registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/**/*.css", "/**/*.html", "/**/*.js", "/**/*.png");
+                .excludePathPatterns("/**/*.css", "/**/*.html", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
+
+        registry.addInterceptor(messageInterceptor)
+                .excludePathPatterns("/**/*.css", "/**/*.html", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
     }
 }

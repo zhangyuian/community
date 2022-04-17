@@ -40,7 +40,6 @@ class KafkaProducer {
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
-
     public void sendMessage(String topic, String content) {
         kafkaTemplate.send(topic, content);
     }
@@ -53,6 +52,5 @@ class KafkaConsumer {
     public void handleMessage(ConsumerRecord record) {
         System.out.println(record.value());
     }
-
 
 }
