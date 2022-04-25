@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
  * @description:
  */
 
-@Component
+//@Component
 public class LoginRequiredInterceptor implements HandlerInterceptor {
 
     @Autowired

@@ -49,4 +49,12 @@ public class DiscussPostService {
     public DiscussPost findDiscussPost(int postId) {
         return discussPostMapper.selectDiscussPost(postId);
     }
+
+    public int updateType(int id, int type) {
+        return discussPostMapper.updateType(id, type);
+    }
+
+    public int updateStatus(int id, int status) {
+        return discussPostMapper.updateStatus(id, status);
+    }
 }

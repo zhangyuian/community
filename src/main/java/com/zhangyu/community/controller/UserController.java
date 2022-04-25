@@ -60,7 +60,7 @@ public class UserController implements CommunityConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @LoginRequired
+
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String upload(Model model, MultipartFile headerImage) {//MultipartFile的名字必须和表单中提交的名字相同
         if (headerImage == null) {
@@ -97,7 +97,7 @@ public class UserController implements CommunityConstant {
         return "redirect:/index";
     }
 
-    @LoginRequired
+
     @RequestMapping(path = "/header/{fileName}", method = RequestMethod.GET)
     public void header(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         String pathName = uploadPath + "/" + fileName;
@@ -118,13 +118,13 @@ public class UserController implements CommunityConstant {
         }
     }
 
-    @LoginRequired
+
     @RequestMapping(path = "/setting")
     public String userSetting() {
         return "/site/setting";
     }
 
-    @LoginRequired
+
     @RequestMapping(path = "/password", method = RequestMethod.POST)
     public String setPassword(Model model, String oldPassword, String newPassword, String confirmPassword) {
         User user = hostHolder.getUser();

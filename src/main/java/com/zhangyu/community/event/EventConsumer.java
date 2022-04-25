@@ -3,6 +3,7 @@ package com.zhangyu.community.event;
 import com.alibaba.fastjson.JSONObject;
 import com.zhangyu.community.entity.Event;
 import com.zhangyu.community.entity.Message;
+import com.zhangyu.community.service.DiscussPostService;
 import com.zhangyu.community.service.MessageService;
 import com.zhangyu.community.utils.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,6 +30,9 @@ public class EventConsumer implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
 
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW})
     public void handleCommentMessage(ConsumerRecord record) {
@@ -63,10 +67,6 @@ public class EventConsumer implements CommunityConstant {
 
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
-
     }
-
-
-
 
 }
