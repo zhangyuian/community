@@ -59,6 +59,4 @@ public class RegisterController {
         return "/site/operate-result";
     }
 
-
-
 }

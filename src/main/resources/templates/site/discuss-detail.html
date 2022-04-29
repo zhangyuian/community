@@ -70,11 +70,11 @@
 					<div class="float-right">
 						<input type="hidden" id="postId" th:value="${post.id}">
 						<button type="button" class="btn btn-danger btn-sm" id="topBtn"
-							th:disabled="${post.type==1}" th:if="${loginUser.type==1 || loginUser.type==2}">置顶</button>
+							th:disabled="${post.type==1}" th:if="${loginUser!=null && (loginUser.type==1 || loginUser.type==2)}">置顶</button>
 						<button type="button" class="btn btn-danger btn-sm" id="wonderfulBtn"
-							th:disabled="${post.status==1}" th:if="${loginUser.type==1 || loginUser.type==2}">加精</button>
+							th:disabled="${post.status==1}" th:if="${loginUser!=null && (loginUser.type==1 || loginUser.type==2)}">加精</button>
 						<button type="button" class="btn btn-danger btn-sm" id="deleteBtn"
-							th:disabled="${post.status==2}" th:if="${loginUser.type==1 || loginUser.type==2}">删除</button>
+							th:disabled="${post.status==2}" th:if="${loginUser!=null && (loginUser.type==1 || loginUser.type==2)}">删除</button>
 					</div>
 				</h6>
 				<!-- 作者 -->

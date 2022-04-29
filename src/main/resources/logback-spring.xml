@@ -71,7 +71,7 @@
     </appender>
 
     <!-- debug file -->
-    <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APPDIR}/log_debug.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/${APPDIR}/debug/log-debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>

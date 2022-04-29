@@ -8,7 +8,9 @@ import com.zhangyu.community.service.UserService;
 import com.zhangyu.community.utils.CommunityConstant;
 import com.zhangyu.community.utils.CommunityUtils;
 import com.zhangyu.community.utils.HostHolder;
+import com.zhangyu.community.utils.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +51,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
@@ -62,6 +67,11 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setContent(content);
         discussPost.setUserId(user.getId());
         discussPostService.addDiscussPost(discussPost);
+
+        // 计算帖子分数
+        String redisKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(redisKey, discussPost.getId());
+
         return communityUtils.getJSONString(0, "帖子发送成功！");
     }
 

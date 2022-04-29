@@ -23,7 +23,7 @@ public class EventProducer {
         // 将时间发布到指定的主题
         kafkaTemplate.send(event.getTopic(), JSONObject.toJSONString(event));
 
-        //
+
     }
 
 }
