@@ -23,6 +23,35 @@ spring:
     host: localhost
     port: 6379
 
+# 线程池配置
+  task:
+    # spring的普通线程池：TaskExecutionProperties
+    execution:
+      pool:
+        core-size: 5
+        max-size: 15
+        queue-capacity: 100
+    # 启动定时任务的线程池：TaskSchedulingProperties
+    scheduling:
+      pool:
+        size: 5
+
+# Quartz Properties 做完这个配置后会将数据持久化到数据库中，不然就是在内存中
+  quartz:
+    job-store-type: jdbc
+    scheduler-name: communityScheduler
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
 
   datasource:
     url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
@@ -61,7 +90,7 @@ mybatis:
   level:
     com:
       zhangyu:
-        community: debug
+        community: info
 
 # community
 community:
@@ -69,4 +98,21 @@ community:
     domain: http://localhost:8080
     upload: C:/Users/bytedance/Documents/header
 
+# wk
+wk:
+  image:
+    command: C:/Program Files/wkhtmltopdf/bin/wkhtmltoimage
+    storage: d:/wk-image
 
+# qiniu
+qiniu:
+  key:
+    access: c3ieYkuYOQPaNKwb_XYXwVQlzGpBOSp9N3Jet6d9
+    secret: 9KE5yAl2FBsTECdw_W48lWPu1qFtleVEbkvvzWMn
+  bucket:
+    header:
+      name: community_header
+      url: http://rb3e6885q.hn-bkt.clouddn.com
+    share:
+      name: community_share
+      url: http://rb3ejbv7b.hn-bkt.clouddn.com
