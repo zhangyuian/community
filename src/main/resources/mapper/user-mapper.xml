@@ -37,15 +37,15 @@
     </insert>
 
     <update id="updateStatus">
-        update user set status =#{status} where id = #{id}
+        update `user` set status=#{status} where id=#{id}
     </update>
 
     <update id="updateHeader">
-        update user set header_url =#{headerUrl} where id = #{id}
+        update `user` set header_url=#{headerUrl} where id=#{id}
     </update>
 
     <update id="updatePassword">
-        update user set password =MD5(#{password}) where id = #{id}
+        update `user` set password=MD5(#{password}) where id=#{id}
     </update>
 
 </mapper>

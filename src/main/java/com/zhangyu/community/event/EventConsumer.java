@@ -136,6 +136,7 @@ public class EventConsumer implements CommunityConstant {
 
     }
 
+    // 上传任务
     class UploadTask implements Runnable {
 
         // 文件名称

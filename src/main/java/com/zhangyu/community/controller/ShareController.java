@@ -70,6 +70,8 @@ public class ShareController implements CommunityConstant {
         return CommunityUtils.getJSONString(0, null, map);
     }
 
+
+
     // 废弃
     // 获取长图
     @RequestMapping(path = "/share/image/{fileName}", method = RequestMethod.GET)

@@ -1,7 +1,5 @@
 package com.zhangyu.community.service;
 
-import com.zhangyu.community.controller.LoginController;
-import com.zhangyu.community.dao.LoginTicketMapper;
 import com.zhangyu.community.dao.UserMapper;
 import com.zhangyu.community.entity.LoginTicket;
 import com.zhangyu.community.entity.User;

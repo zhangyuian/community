@@ -90,7 +90,7 @@ mybatis:
   level:
     com:
       zhangyu:
-        community: info
+        community: debug
 
 # community
 community:
@@ -111,8 +111,9 @@ qiniu:
     secret: 9KE5yAl2FBsTECdw_W48lWPu1qFtleVEbkvvzWMn
   bucket:
     header:
-      name: community_header
+      name: header-zhangyu-01
       url: http://rb3e6885q.hn-bkt.clouddn.com
     share:
-      name: community_share
+      name: image-zhangyu-01
       url: http://rb3ejbv7b.hn-bkt.clouddn.com
+
