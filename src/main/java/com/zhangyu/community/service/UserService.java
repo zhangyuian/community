@@ -97,6 +97,7 @@ public class UserService implements CommunityConstant{
         user.setPassword(password);
         user.setSalt(salt);
         user.setType(0);
+
         user.setStatus(0);
         user.setActivationCode(UUID.randomUUID().toString().substring(0, 10));
         user.setHeaderUrl(String.format("http://images.nowcoder.com/head/%dt.png", new Random().nextInt(1000)));

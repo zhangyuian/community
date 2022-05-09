@@ -117,3 +117,16 @@ qiniu:
       name: image-zhangyu-01
       url: http://rb3ejbv7b.hn-bkt.clouddn.com
 
+# caffeine
+caffeine:
+  posts:
+    max-size: 15
+    expire-seconds: 180
+
+# actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: info,caches

@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
  * @description:
  */
 
+@Deprecated
 //@Component
 public class LoginRequiredInterceptor implements HandlerInterceptor {
 
